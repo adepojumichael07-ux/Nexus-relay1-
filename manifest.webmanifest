@@ -1,0 +1,9 @@
+{
+  "name": "Nexus Relay Emergency Mesh",
+  "short_name": "Nexus Relay",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#071018",
+  "theme_color": "#071018",
+  "description": "Offline-first emergency communication for network blackout areas."
+}

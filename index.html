@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#071018" />
+  <meta name="description" content="Nexus Relay — cloud-connected emergency communication for network blackout areas using offline-first mesh networking." />
+  <title>Nexus Relay · Emergency Mesh</title>
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect rx='14' width='64' height='64' fill='%23071018'/%3E%3Cpath d='M32 10l16 8v12c0 10-6.8 18.4-16 22-9.2-3.6-16-12-16-22V18z' fill='none' stroke='%233ee0b0' stroke-width='3'/%3E%3Ccircle cx='32' cy='30' r='4' fill='%23ffb020'/%3E%3C/svg%3E" />
+  <style>
+    :root {
+      --bg: #071018;
+      --bg-2: #0c1824;
+      --card: rgba(16, 32, 46, 0.86);
+      --line: rgba(140, 190, 210, 0.16);
+      --text: #e8f4f2;
+      --muted: #8ea8b4;
+      --teal: #3ee0b0;
+      --teal-dim: rgba(62, 224, 176, 0.14);
+      --amber: #ffb020;
+      --red: #ff5d6c;
+      --blue: #6cb6ff;
+      --shadow: 0 18px 50px rgba(0, 0, 0, 0.35);
+      --radius: 18px;
+      font-family: "Segoe UI", ui-sans-serif, system-ui, -apple-system, sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; background: var(--bg); color: var(--text); }
+    body {
+      min-height: 100vh;
+      background:
+        radial-gradient(900px 480px at 90% -10%, rgba(62, 224, 176, 0.14), transparent 55%),
+        radial-gradient(700px 420px at -10% 20%, rgba(108, 182, 255, 0.12), transparent 50%),
+        var(--bg);
+    }
+    .wrap { max-width: 980px; margin: 0 auto; padding: 18px 16px 48px; }
+    header {
+      display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;
+      margin-bottom: 16px;
+    }
+    .brand { display: flex; gap: 12px; align-items: center; }
+    .mark {
+      width: 46px; height: 46px; border-radius: 14px;
+      background: linear-gradient(160deg, #123246, #0a1a26);
+      border: 1px solid var(--line);
+      display: grid; place-items: center;
+      box-shadow: var(--shadow);
+    }
+    h1 { font-size: 1.25rem; margin: 0; letter-spacing: -0.03em; }
+    .sub { color: var(--muted); font-size: 0.82rem; margin-top: 2px; }
+    .pills { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+    .pill {
+      border: 1px solid var(--line); background: rgba(8, 18, 28, 0.7);
+      border-radius: 999px; padding: 6px 10px; font-size: 0.75rem; color: var(--muted);
+      display: inline-flex; align-items: center; gap: 6px;
+    }
+    .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--amber); box-shadow: 0 0 0 4px rgba(255, 176, 32, 0.12); }
+    .dot.on { background: var(--teal); box-shadow: 0 0 0 4px rgba(62, 224, 176, 0.14); }
+    .dot.off { background: var(--red); box-shadow: 0 0 0 4px rgba(255, 93, 108, 0.14); }
+    .grid { display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 14px; }
+    .card {
+      background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+      padding: 16px; backdrop-filter: blur(10px); box-shadow: var(--shadow);
+    }
+    .card h2 { margin: 0 0 4px; font-size: 1rem; }
+    .hint { color: var(--muted); font-size: 0.8rem; margin: 0 0 14px; line-height: 1.45; }
+    label { display: block; font-size: 0.75rem; letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted); margin: 12px 0 6px; }
+    input, select, textarea {
+      width: 100%; border-radius: 12px; border: 1px solid var(--line);
+      background: #09141d; color: var(--text); padding: 12px 12px; font-size: 1rem;
+      outline: none;
+    }
+    select { appearance: none; background-image: linear-gradient(45deg, transparent 50%, var(--teal) 50%), linear-gradient(135deg, var(--teal) 50%, transparent 50%); background-position: calc(100% - 18px) 18px, calc(100% - 12px) 18px; background-size: 6px 6px, 6px 6px; background-repeat: no-repeat; }
+    textarea { min-height: 84px; resize: vertical; }
+    input:focus, select:focus, textarea:focus { border-color: rgba(62, 224, 176, 0.7); }
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .actions { display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap; }
+    button {
+      border: 0; border-radius: 12px; padding: 12px 14px; font-weight: 650; cursor: pointer; font-size: 0.95rem;
+    }
+    .primary { background: linear-gradient(180deg, #4ae8ba, #1fb98d); color: #062018; flex: 1; }
+    .ghost { background: transparent; color: var(--text); border: 1px solid var(--line); }
+    .warn { background: rgba(255, 176, 32, 0.14); color: var(--amber); border: 1px solid rgba(255, 176, 32, 0.3); }
+    .mesh {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 8px;
+    }
+    .node {
+      border: 1px solid var(--line); border-radius: 14px; padding: 10px; background: #09141d; min-height: 78px;
+    }
+    .node b { display: block; font-size: 0.82rem; }
+    .node span { color: var(--muted); font-size: 0.72rem; }
+    .feed { display: flex; flex-direction: column; gap: 8px; max-height: 420px; overflow: auto; }
+    .item {
+      border: 1px solid var(--line); border-radius: 14px; padding: 10px 12px; background: #09141d;
+    }
+    .item .top { display: flex; justify-content: space-between; gap: 8px; font-size: 0.82rem; }
+    .badge { border-radius: 999px; padding: 2px 8px; font-size: 0.7rem; border: 1px solid var(--line); color: var(--muted); }
+    .badge.queued { color: var(--amber); border-color: rgba(255, 176, 32, 0.35); }
+    .badge.mesh { color: var(--blue); border-color: rgba(108, 182, 255, 0.35); }
+    .badge.cloud { color: var(--teal); border-color: rgba(62, 224, 176, 0.35); }
+    .meta { color: var(--muted); font-size: 0.75rem; margin-top: 4px; line-height: 1.4; }
+    .banner {
+      margin-top: 14px; border-radius: 14px; padding: 10px 12px; background: var(--teal-dim);
+      border: 1px solid rgba(62, 224, 176, 0.25); color: var(--text); font-size: 0.82rem;
+    }
+    .steps { margin: 0; padding-left: 18px; color: var(--muted); font-size: 0.82rem; line-height: 1.55; }
+    footer { color: var(--muted); font-size: 0.75rem; margin-top: 16px; line-height: 1.5; }
+    @media (max-width: 800px) {
+      .grid, .row { grid-template-columns: 1fr; }
+      header { flex-direction: column; }
+      .pills { justify-content: flex-start; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="brand">
+        <div class="mark" aria-hidden="true">
+          <svg width="26" height="26" viewBox="0 0 64 64" fill="none">
+            <path d="M32 8l18 9v14c0 11-7.6 20.6-18 24.6C21.6 51.6 14 42 14 31V17L32 8z" stroke="#3ee0b0" stroke-width="4"/>
+            <circle cx="32" cy="30" r="4" fill="#ffb020"/>
+            <path d="M22 40c3 3 7 5 10 5s7-2 10-5" stroke="#6cb6ff" stroke-width="3" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div>
+          <h1>Nexus Relay</h1>
+          <div class="sub">Cloud-connected emergency mesh for blackout areas</div>
+        </div>
+      </div>
+      <div class="pills">
+        <span class="pill"><span id="netDot" class="dot"></span><span id="netLabel">Checking link</span></span>
+        <span class="pill"><span class="dot on"></span><span id="meshLabel">Mesh idle</span></span>
+        <span class="pill" id="queuePill">Queue 0</span>
+      </div>
+    </header>
+
+    <div class="grid">
+      <section class="card">
+        <h2>Send an incident</h2>
+        <p class="hint">Works with no internet. The report is stored on this device, relayed to nearby mesh nodes, and uploaded to the cloud when a path opens.</p>
+
+        <label for="incident">Incident type</label>
+        <select id="incident">
+          <option value="">Select incident type</option>
+          <option>Medical emergency</option>
+          <option>Fire</option>
+          <option>Flood / disaster</option>
+          <option>Road accident</option>
+          <option>Security threat</option>
+          <option>Missing person</option>
+          <option>Building collapse</option>
+          <option>Infrastructure failure</option>
+          <option>Other</option>
+        </select>
+
+        <label for="preset">Emergency number</label>
+        <select id="preset">
+          <option value="">Choose a hotline, or type one below</option>
+          <option value="112">112 — National emergency</option>
+          <option value="767">767 — Lagos emergency (LASEMA / distress)</option>
+          <option value="199">199 — Police</option>
+          <option value="122">122 — FRSC road safety</option>
+          <option value="08032003557">08032003557 — Federal Fire Service</option>
+          <option value="080022556362">0800 225 56362 — NEMA</option>
+          <option value="08060907333">08060907333 — LASEMA</option>
+          <option value="08033234943">08033234943 — Lagos Fire Service</option>
+        </select>
+        <input id="number" inputmode="tel" placeholder="Emergency number" autocomplete="tel" />
+
+        <div class="row">
+          <div>
+            <label for="area">Location</label>
+            <input id="area" placeholder="Area, landmark, or address" />
+          </div>
+          <div>
+            <label for="priority">Priority</label>
+            <select id="priority">
+              <option>Critical</option>
+              <option>High</option>
+              <option selected>Medium</option>
+              <option>Low</option>
+            </select>
+          </div>
+        </div>
+        <label for="note">What is happening</label>
+        <textarea id="note" placeholder="People involved, injuries, access route, hazards"></textarea>
+
+        <div class="actions">
+          <button class="ghost" id="locBtn" type="button">Use my location</button>
+          <button class="primary" id="sendBtn" type="button">Broadcast on mesh</button>
+        </div>
+        <div class="banner" id="status">Ready. Reports stay on-device until a mesh peer or cloud link can carry them.</div>
+      </section>
+
+      <aside>
+        <section class="card">
+          <h2>Nearby mesh</h2>
+          <p class="hint">Simulated delay-tolerant nodes. In a field build these are phones over Bluetooth / Wi-Fi Direct that store-and-forward when cellular is down.</p>
+          <div class="mesh" id="mesh"></div>
+        </section>
+        <section class="card" style="margin-top:14px">
+          <h2>How a blackout relay works</h2>
+          <ol class="steps">
+            <li>You file the incident offline. It is queued in local storage.</li>
+            <li>Nearby devices exchange the packet (mesh / DTN). No tower required.</li>
+            <li>The first node that reaches a network uploads it to the cloud desk.</li>
+            <li>Responders see type, number, and location together.</li>
+          </ol>
+        </section>
+      </aside>
+    </div>
+
+    <section class="card" style="margin-top:14px">
+      <div style="display:flex; justify-content:space-between; gap:8px; align-items:center;">
+        <h2>Incident desk</h2>
+        <button class="warn" id="clearBtn" type="button">Clear local queue</button>
+      </div>
+      <p class="hint">Local outbox. Status moves from queued → mesh relayed → cloud synced.</p>
+      <div class="feed" id="feed"></div>
+    </section>
+    <footer>
+      Demo desk for design and implementation of an offline-first emergency mesh. Hotlines are public Lagos / Nigeria contacts for reference — confirm before operational use. This page does not place a live call or contact emergency services.
+    </footer>
+  </div>
+  <script>
+    const KEY = "nexus-relay-reports-v1";
+    const nodes = [
+      { id: "NR-04", name: "Ikeja handset", hop: "1 hop · BLE" },
+      { id: "NR-11", name: "Yaba kiosk", hop: "2 hops · Wi-Fi Direct" },
+      { id: "NR-19", name: "Cloud gateway", hop: "awaits uplink" }
+    ];
+    const $ = (id) => document.getElementById(id);
+    const feed = $("feed");
+    let online = navigator.onLine;
+
+    function load() {
+      try { return JSON.parse(localStorage.getItem(KEY) || "[]"); }
+      catch { return []; }
+    }
+    function save(items) { localStorage.setItem(KEY, JSON.stringify(items)); }
+
+    function paintNet() {
+      $("netDot").className = "dot " + (online ? "on" : "off");
+      $("netLabel").textContent = online ? "Cloud link up" : "Blackout · offline first";
+      $("meshLabel").textContent = online ? "Mesh + cloud" : "Mesh only";
+    }
+    function paintMesh() {
+      $("mesh").innerHTML = nodes.map((n) => `
+        <div class="node"><b>${n.name}</b><span>${n.id}<br>${online && n.id === "NR-19" ? "uplink open" : n.hop}</span></div>
+      `).join("");
+    }
+    function paint() {
+      const items = load();
+      $("queuePill").textContent = "Queue " + items.filter((i) => i.status !== "cloud").length;
+      feed.innerHTML = items.length ? items.map((i) => `
+        <article class="item">
+          <div class="top">
+            <strong>${i.incident}</strong>
+            <span class="badge ${i.status}">${i.status}</span>
+          </div>
+          <div class="meta">${i.priority} · ${i.number} · ${i.area}<br>${i.note || "No extra note"} · ${i.time}</div>
+        </article>
+      `).join("") : `<div class="meta">No incidents yet. File one above — it will remain available after refresh and without a network.</div>`;
+      paintNet();
+      paintMesh();
+    }
+    function setStatus(text) { $("status").textContent = text; }
+
+    $("preset").addEventListener("change", () => {
+      if ($("preset").value) $("number").value = $("preset").value;
+    });
+    $("locBtn").addEventListener("click", () => {
+      if (!navigator.geolocation) {
+        setStatus("Geolocation is not available in this browser. Type a landmark instead.");
+        return;
+      }
+      setStatus("Requesting location…");
+      navigator.geolocation.getCurrentPosition((pos) => {
+        const { latitude, longitude } = pos.coords;
+        $("area").value = `${latitude.toFixed(5)}, ${longitude.toFixed(5)}`;
+        setStatus("Location attached. You can add a landmark beside the coordinates.");
+      }, () => setStatus("Location denied. Enter an area or landmark manually."));
+    });
+    $("sendBtn").addEventListener("click", () => {
+      const incident = $("incident").value;
+      const number = $("number").value.trim();
+      const area = $("area").value.trim();
+      if (!incident || !number || !area) {
+        setStatus("Incident type, emergency number, and location are required.");
+        return;
+      }
+      const item = {
+        id: crypto.randomUUID(),
+        incident,
+        number,
+        area,
+        priority: $("priority").value,
+        note: $("note").value.trim(),
+        status: "queued",
+        time: new Date().toLocaleString()
+      };
+      const items = [item, ...load()].slice(0, 40);
+      save(items);
+      paint();
+      setStatus("Queued on this device. Relaying to nearby mesh nodes…");
+      setTimeout(() => advance(item.id, "mesh", "Relayed across the local mesh. Waiting for any node with a cloud path."), 900);
+      if (online) setTimeout(() => advance(item.id, "cloud", "Cloud desk received the packet. Responders can see type, number, and location."), 1800);
+    });
+    function advance(id, status, message) {
+      const items = load().map((i) => i.id === id ? { ...i, status } : i);
+      save(items);
+      paint();
+      setStatus(message);
+    }
+    $("clearBtn").addEventListener("click", () => { localStorage.removeItem(KEY); paint(); setStatus("Local queue cleared."); });
+    window.addEventListener("online", () => { online = true; paint(); flush(); });
+    window.addEventListener("offline", () => { online = false; paint(); setStatus("Link lost. New reports stay in the offline mesh queue."); });
+    function flush() {
+      const pending = load().filter((i) => i.status !== "cloud");
+      if (!pending.length) { setStatus("Cloud link restored. Queue is already clear."); return; }
+      setStatus("Cloud link restored. Uploading " + pending.length + " queued report(s)…");
+      pending.forEach((i, idx) => setTimeout(() => advance(i.id, "cloud", "Queued blackout reports synced to the cloud desk."), 600 + idx * 400));
+    }
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("sw.js").catch(() => {});
+    }
+    paint();
+  </script>
+</body>
+</html>
